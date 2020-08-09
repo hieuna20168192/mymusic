@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <dimen name="album_art">55dp</dimen>
+    <dimen name="album_art_large">100dp</dimen>
+    <dimen name="album_art_mega">250dp</dimen>
+
+    <dimen name="album_art_spacing">2dp</dimen>
+    <dimen name="album_art_circle_small">42dp</dimen>
+
+    <dimen name="corner_small">4dp</dimen>
+    <dimen name="corner_large">8dp</dimen>
+    <dimen name="corner_extra_large">10dp</dimen>
+
+    <dimen name="song_staggered_grid_margin_top_first">72dp</dimen>
+    <dimen name="song_staggered_grid_card_width_portrait">165dp</dimen>
+    <dimen name="song_staggered_grid_card_height_portrait">247dp</dimen>
+    <dimen name="song_staggered_grid_card_width_landscape">188dp</dimen>
+    <dimen name="song_staggered_grid_card_height_landscape">140dp</dimen>
+    <dimen name="shr_staggered_grid_spacing_small">26dp</dimen>
+
+    <dimen name="song_grid_reveal_height">200dp</dimen>
+
+    <dimen name="bottom_controls_height">65dp</dimen>
+    <dimen name="song_grid_spacing_large">34dp</dimen>
+    <dimen name="song_grid_spacing_small">32dp</dimen>
+</resources>
