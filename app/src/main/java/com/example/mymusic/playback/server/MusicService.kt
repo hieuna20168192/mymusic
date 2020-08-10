@@ -1,8 +1,6 @@
 package com.example.mymusic.playback.server
 
-import android.annotation.SuppressLint
 import android.app.PendingIntent
-import android.media.browse.MediaBrowser.MediaItem.FLAG_BROWSABLE
 import android.net.Uri
 import android.os.Bundle
 import android.support.v4.media.MediaBrowserCompat

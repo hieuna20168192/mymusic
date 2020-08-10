@@ -1,8 +1,5 @@
 package com.example.mymusic.presenter
 
-import android.support.v4.media.MediaBrowserCompat
-import android.util.Log
-import com.example.mymusic.playback.server.MediaSessionConnection
 import com.example.mymusic.repository.SongRepository
 
 class MainPresenter(
