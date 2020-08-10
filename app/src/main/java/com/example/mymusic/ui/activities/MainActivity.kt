@@ -1,19 +1,33 @@
 package com.example.mymusic.ui.activities
 
+import Permission.Companion.REQUEST_CODE_PERMISSION
+import android.content.ComponentName
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.animation.AccelerateDecelerateInterpolator
 import androidx.core.content.ContextCompat
 import com.example.mymusic.R
+import com.example.mymusic.playback.server.MediaSessionConnection
+import com.example.mymusic.playback.server.MediaSessionConnectionImpl
+import com.example.mymusic.playback.server.MusicService
+import com.example.mymusic.repository.SongReposImpl
+import com.example.mymusic.repository.SongRepository
 import com.example.mymusic.util.NavigationIconClickListener
 import com.example.mymusic.ui.fragments.SongGridFragment
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
+
+    private lateinit var mediaSessionConnection : MediaSessionConnection
+    private lateinit var songRepository: SongRepository
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        songRepository = SongReposImpl(contentResolver)
+        mediaSessionConnection = MediaSessionConnectionImpl.getInstance(application, ComponentName(application, MusicService::class.java))
+        Permission.checkPermission(this, REQUEST_CODE_PERMISSION)
         if (savedInstanceState == null) {
             supportFragmentManager
                 .beginTransaction()

@@ -38,7 +38,7 @@ object Utils {
     const val MUSIC_ONLY_SELECTION = "$IS_MUSIC=1 AND $TITLE != ''"
     const val EMPTY_ALBUM_ART_URI = "android.resource://com.example.mymusic/drawable/icon"
 
-    val IMAGE_ROUND_CORNERS_TRANSFORMER: Transformation<Bitmap>
+    private val IMAGE_ROUND_CORNERS_TRANSFORMER: Transformation<Bitmap>
         get() = RoundedCorners(2)
 
     fun getAlbumArtUri(albumId: Long) = withAppendedId(Uri.parse("content://media/external/audio/albumart"), albumId)!!

@@ -1,12 +1,7 @@
 package com.example.mymusic.models
 
 import android.database.Cursor
-import android.media.MediaPlayer.MetricsConstants.DURATION
-import android.provider.BaseColumns._ID
-import android.provider.ContactsContract.CommonDataKinds.Organization.TITLE
-import android.provider.MediaStore.Audio.AlbumColumns.*
-import android.provider.MediaStore.Audio.AudioColumns.TRACK
-import android.provider.MediaStore.Audio.Playlists.Members.AUDIO_ID
+import android.provider.MediaStore
 import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaDescriptionCompat
 import com.example.mymusic.extensions.value
@@ -17,7 +12,7 @@ import com.example.mymusic.util.Utils.getAlbumArtUri
 import kotlinx.android.parcel.Parcelize
 
 @Parcelize
-data class Song (
+data class Song(
     var id: Long = 0,
     var albumId: Long = 0,
     var artistId: Long = 0,
@@ -36,27 +31,27 @@ data class Song (
     companion object {
         fun fromCursor(cursor: Cursor, albumId: Long = -1, artistId: Long = -1): Song {
             return Song(
-                id = cursor.value(_ID),
-                albumId = cursor.valueOrDefault(ALBUM_ID, albumId),
-                artistId = cursor.valueOrDefault(ARTIST_ID, artistId),
-                title = cursor.valueOrEmpty(TITLE),
-                artist = cursor.valueOrEmpty(ARTIST),
-                album = cursor.valueOrEmpty(ALBUM),
-                duration = cursor.value(DURATION),
-                trackNumber = cursor.value<Int>(TRACK).normalizeTrackNumber()
+                id = cursor.value(MediaStore.Audio.Media._ID),
+                albumId = cursor.valueOrDefault(MediaStore.Audio.Media.ALBUM_ID, albumId),
+                artistId = cursor.valueOrDefault(MediaStore.Audio.Media.ARTIST_ID, artistId),
+                title = cursor.valueOrEmpty(MediaStore.Audio.Media.TITLE),
+                artist = cursor.valueOrEmpty(MediaStore.Audio.Media.ARTIST),
+                album = cursor.valueOrEmpty(MediaStore.Audio.Media.ALBUM),
+                duration = cursor.value(MediaStore.Audio.Media.DURATION),
+                trackNumber = cursor.value<Int>(MediaStore.Audio.Media.TRACK).normalizeTrackNumber()
             )
         }
 
         fun fromPlaylistMembersCursor(cursor: Cursor): Song {
             return Song(
-                id = cursor.value(AUDIO_ID),
-                albumId = cursor.value(ALBUM_ID),
-                artistId = cursor.value(ARTIST_ID),
-                title = cursor.valueOrEmpty(TITLE),
-                artist = cursor.valueOrEmpty(ARTIST),
-                album = cursor.valueOrEmpty(ALBUM),
-                duration = (cursor.value<Long>(DURATION) / 1000).toInt(),
-                trackNumber = cursor.value<Int>(TRACK).normalizeTrackNumber()
+                id = cursor.value(MediaStore.Audio.Playlists.Members.AUDIO_ID),
+                albumId = cursor.value(MediaStore.Audio.AudioColumns.ALBUM_ID),
+                artistId = cursor.value(MediaStore.Audio.AudioColumns.ARTIST_ID),
+                title = cursor.valueOrEmpty(MediaStore.Audio.AudioColumns.TITLE),
+                artist = cursor.valueOrEmpty(MediaStore.Audio.AudioColumns.ARTIST),
+                album = cursor.valueOrEmpty(MediaStore.Audio.AudioColumns.ALBUM),
+                duration = (cursor.value<Long>(MediaStore.Audio.AudioColumns.DURATION) / 1000).toInt(),
+                trackNumber = cursor.value<Int>(MediaStore.Audio.AudioColumns.TRACK).normalizeTrackNumber()
             )
         }
     }

@@ -10,7 +10,7 @@ import com.example.mymusic.R
 import com.example.mymusic.models.Song
 import com.example.mymusic.util.Utils
 
-class SongAdapter internal constructor(private val songList: List<Song>) : RecyclerView.Adapter<SongAdapter.ViewHolder>() {
+class SongAdapter internal constructor(var songList: List<Song>) : RecyclerView.Adapter<SongAdapter.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val layoutView = LayoutInflater.from(parent.context).inflate(R.layout.item_song, parent, false)
@@ -31,5 +31,10 @@ class SongAdapter internal constructor(private val songList: List<Song>) : Recyc
         var albumArt: ImageView = itemView.findViewById(R.id.album_art)
         var songTitle: TextView = itemView.findViewById(R.id.song_title)
         var songArtist: TextView = itemView.findViewById(R.id.song_artist)
+    }
+
+    fun updateDate(songs: List<Song>) {
+        this.songList = songs
+        notifyDataSetChanged()
     }
 }
