@@ -16,7 +16,7 @@ class SongReposImpl(
     private val contentResolver: ContentResolver
 ) : SongRepository {
 
-    override var songList: List<Song> = mutableListOf()
+    override var songList: List<Song> = listOf()
 
     override fun loadSongs(caller: String?): List<Song> {
         MediaID.currentCaller = caller
@@ -71,7 +71,7 @@ class SongReposImpl(
                 cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID)
 
             while (cursor.moveToNext()) {
-                // Get values of columns for a given video.
+                // Get values of columns for a given audio.
                 val id = cursor.getLong(idColumn)
                 val title = cursor.getString(titleColumn)
                 val artist = cursor.getString(artistColumn)
@@ -81,9 +81,18 @@ class SongReposImpl(
                 val artistID = cursor.getLong(artistIDColumn)
                 val albumID = cursor.getLong(albumIDColumn)
 
+//                var id: Long = 0,
+//                var albumId: Long = 0,
+//                var artistId: Long = 0,
+//                var title: String = "",
+//                var artist: String = "",
+//                var album: String = "",
+//                var duration: Int = 0,
+//                var trackNumber: Int = 0
+
                 // Stores column values and the contentUri in a local object
                 // that represents the media file.
-                songList += (Song(id, albumID, artistID, title, artist, album, duration, track))
+                songList += Song(id, albumID, artistID, title, artist, album, duration, track)
             }
             Log.d("songList.size() = ", songList.size.toString())
             cursor?.close()

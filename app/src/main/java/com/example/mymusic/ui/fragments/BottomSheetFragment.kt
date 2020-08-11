@@ -1,5 +1,6 @@
 package com.example.mymusic.ui.fragments
 
+import android.content.ComponentName
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -7,12 +8,18 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import com.example.mymusic.R
+import com.example.mymusic.playback.server.MediaSessionConnection
+import com.example.mymusic.playback.server.MediaSessionConnectionImpl
+import com.example.mymusic.playback.server.MusicService
+import com.example.mymusic.presenter.MainContract
+import com.example.mymusic.presenter.PlayerPresenter
+import com.example.mymusic.repository.SongReposImpl
 import com.example.mymusic.ui.activities.MainActivity
 import com.example.mymusic.widgets.BottomSheetListener
 import com.google.android.material.bottomsheet.BottomSheetBehavior.*
 import kotlinx.android.synthetic.main.fragment_bottom_sheet.*
 
-class BottomSheetFragment : Fragment(), BottomSheetListener {
+class BottomSheetFragment : Fragment(), BottomSheetListener, MainContract.Player {
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -22,8 +29,22 @@ class BottomSheetFragment : Fragment(), BottomSheetListener {
         return inflater.inflate(R.layout.fragment_bottom_sheet, container, false)
     }
 
+    private lateinit var playerPresenter: PlayerPresenter
+
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
+
+        // Set up Presenter
+        setPresenter(
+            PlayerPresenter(
+                this, SongReposImpl(activity!!.contentResolver),
+                MediaSessionConnectionImpl.getInstance(
+                    activity!!,
+                    ComponentName(activity!!, MusicService::class.java)
+                )
+            )
+        )
+
 
         // Set up UI
         val layoutParams = progressBar.layoutParams as LinearLayout.LayoutParams
@@ -87,5 +108,13 @@ class BottomSheetFragment : Fragment(), BottomSheetListener {
         } else {
             progressBar.visibility = View.VISIBLE
         }
+    }
+
+    override fun updateIcon() {
+
+    }
+
+    override fun setPresenter(presenter: MainContract.Presenter) {
+
     }
 }

@@ -116,6 +116,7 @@ class MusicService :
         }
 
         if (caller == CALLER_SELF) {
+            Log.d("mediaItems.size() = ", mediaItems.size.toString())
             result.sendResult(mediaItems)
         } else {
             result.sendResult(mediaItems.toRawMediaItems())
@@ -152,7 +153,6 @@ class MusicService :
             CALLER_OTHER
         }
 
-        repository.loadSongs(caller)
         Log.d("Root folder: ", MediaID(MEDIA_ID_ROOT.toString(), null, caller).asString(), null)
         return BrowserRoot(
             MediaID(

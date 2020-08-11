@@ -10,4 +10,8 @@ interface MainContract {
     interface View : BaseView<Presenter> {
         fun displaySong(list: List<Song>)
     }
+
+    interface Player: BaseView<Presenter> {
+        fun updateIcon()
+    }
 }

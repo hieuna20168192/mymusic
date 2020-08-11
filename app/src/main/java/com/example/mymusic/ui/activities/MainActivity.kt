@@ -2,6 +2,7 @@ package com.example.mymusic.ui.activities
 
 import Permission.Companion.REQUEST_CODE_PERMISSION
 import android.content.ComponentName
+import android.media.AudioManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
@@ -10,18 +11,23 @@ import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.FrameLayout
 import androidx.core.content.ContextCompat
 import com.example.mymusic.R
+import com.example.mymusic.extensions.addFragment
+import com.example.mymusic.models.MediaID
 import com.example.mymusic.playback.server.MediaSessionConnection
 import com.example.mymusic.playback.server.MediaSessionConnectionImpl
 import com.example.mymusic.playback.server.MusicService
+import com.example.mymusic.playback.server.MusicService.Companion.TYPE_ALL_SONGS
 import com.example.mymusic.repository.SongReposImpl
 import com.example.mymusic.repository.SongRepository
 import com.example.mymusic.ui.fragments.BottomSheetFragment
+import com.example.mymusic.ui.fragments.MediaItemFragment
 import com.example.mymusic.util.NavigationIconClickListener
 import com.example.mymusic.ui.fragments.SongGridFragment
 import com.example.mymusic.widgets.BottomSheetListener
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetBehavior.*
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.music_backdrop.*
 
 class MainActivity : AppCompatActivity() {
 
@@ -44,9 +50,9 @@ class MainActivity : AppCompatActivity() {
         if (savedInstanceState == null) {
             supportFragmentManager
                 .beginTransaction()
-                .add(
+                .replace(
                     R.id.container,
-                    SongGridFragment()
+                    MediaItemFragment.newInstance(MediaID(TYPE_ALL_SONGS.toString(), null))
                 )
                 .commit()
 
@@ -60,6 +66,20 @@ class MainActivity : AppCompatActivity() {
                     ).commit()
             }, 150)
         }
+
+        // Drop Menu Event
+        nav_list.setOnClickListener {
+            supportFragmentManager
+                .beginTransaction()
+                .replace(
+                    R.id.container,
+                    MediaItemFragment.newInstance(MediaID(TYPE_ALL_SONGS.toString(), null))
+                )
+                .commit()
+        }
+
+        // Set up volume control system
+        volumeControlStream = AudioManager.STREAM_MUSIC
 
         // Associated bottom_sheet_view with the bottomSheetBehavior
         val rootViewAssociated = bottom_sheet_parent as FrameLayout
@@ -137,6 +157,29 @@ class MainActivity : AppCompatActivity() {
             }
             bottomSheetListener?.onStateChanged(bottomSheet, newState)
         }
-
     }
+
+    private fun navigateToMediaItem(mediaId: MediaID) {
+       if (getBrowseFragment(mediaId) == null) {
+           val fragment = MediaItemFragment.newInstance(mediaId)
+           // Add Fragment
+           addFragment(
+               fragment = fragment,
+               tag = mediaId.type,
+               addToBackStack = !isRootId(mediaId)
+           )
+       }
+    }
+
+    private fun isRootId(mediaID: MediaID) = mediaID.type ==
+            mediaSessionConnection.rootMediaId?.let {
+                MediaID().fromString(
+                    it
+                ).type
+            }
+
+    private fun getBrowseFragment(mediaID: MediaID): MediaItemFragment? {
+        return supportFragmentManager.findFragmentByTag(mediaID.type) as MediaItemFragment?
+    }
+
 }

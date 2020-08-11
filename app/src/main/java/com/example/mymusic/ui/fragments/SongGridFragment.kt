@@ -1,5 +1,6 @@
 package com.example.mymusic.ui.fragments
 
+import android.content.ComponentName
 import android.os.Build
 import android.os.Bundle
 import android.support.v4.media.MediaBrowserCompat
@@ -8,12 +9,15 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.KeyEventDispatcher
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.mymusic.R
 import com.example.mymusic.models.MediaID
 import com.example.mymusic.models.Song
 import com.example.mymusic.playback.server.MediaSessionConnection
+import com.example.mymusic.playback.server.MediaSessionConnectionImpl
+import com.example.mymusic.playback.server.MusicService
 import com.example.mymusic.presenter.MainContract
 import com.example.mymusic.presenter.MainPresenter
 import com.example.mymusic.repository.SongReposImpl
@@ -23,9 +27,9 @@ import com.example.mymusic.util.SongGridItemDecoration
 import kotlinx.android.synthetic.main.song_grid_fragment.view.recycler_view
 import kotlinx.android.synthetic.main.song_grid_fragment.view.song_grid
 
-class SongGridFragment : Fragment(), MainContract.View {
+class SongGridFragment : MediaItemFragment(), MainContract.View {
 
-    internal lateinit var presenter: MainContract.Presenter
+    private lateinit var presenter: MainContract.Presenter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,7 +45,10 @@ class SongGridFragment : Fragment(), MainContract.View {
         val view = inflater.inflate(R.layout.song_grid_fragment, container, false)
 
         // Set up Presenter
-        setPresenter(MainPresenter(this, SongReposImpl(context!!.contentResolver)))
+        setPresenter(MainPresenter(this, SongReposImpl(context!!.contentResolver),
+            MediaSessionConnectionImpl.getInstance(activity!!, ComponentName(activity!!,
+                MusicService::class.java))))
+
         presenter.onViewCreated()
 
         // Set up the RecyclerView
