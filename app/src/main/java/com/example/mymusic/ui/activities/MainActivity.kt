@@ -5,7 +5,9 @@ import android.content.ComponentName
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
+import android.view.View
 import android.view.animation.AccelerateDecelerateInterpolator
+import android.widget.FrameLayout
 import androidx.core.content.ContextCompat
 import com.example.mymusic.R
 import com.example.mymusic.playback.server.MediaSessionConnection
@@ -16,12 +18,18 @@ import com.example.mymusic.repository.SongRepository
 import com.example.mymusic.ui.fragments.BottomSheetFragment
 import com.example.mymusic.util.NavigationIconClickListener
 import com.example.mymusic.ui.fragments.SongGridFragment
+import com.example.mymusic.widgets.BottomSheetListener
+import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.android.material.bottomsheet.BottomSheetBehavior.*
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var mediaSessionConnection: MediaSessionConnection
     private lateinit var songRepository: SongRepository
+
+    private var bottomSheetListener: BottomSheetListener? = null
+    private var bottomSheetBehavior: BottomSheetBehavior<View>? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -49,9 +57,18 @@ class MainActivity : AppCompatActivity() {
                     .add(
                         R.id.bottomControlsContainer,
                         BottomSheetFragment()
-                    )
+                    ).commit()
             }, 150)
         }
+
+        // Associated bottom_sheet_view with the bottomSheetBehavior
+        val rootViewAssociated = bottom_sheet_parent as FrameLayout
+        bottomSheetBehavior = BottomSheetBehavior.from(rootViewAssociated)
+        bottomSheetBehavior?.isHideable = true
+        bottomSheetBehavior?.setBottomSheetCallback(BottomSheetCallback())
+
+        // invoke unFocusable screen event
+        dimOverlay.setOnClickListener{ collapseBottomSheet() }
 
         // Set up the tool bar
         (this as AppCompatActivity).setSupportActionBar(app_bar)
@@ -73,4 +90,53 @@ class MainActivity : AppCompatActivity() {
 
     }
 
+    fun setBottomSheetListener(bottomSheetListener: BottomSheetListener) {
+        this.bottomSheetListener = bottomSheetListener
+    }
+
+    fun collapseBottomSheet() {
+        bottomSheetBehavior?.state = STATE_COLLAPSED
+    }
+
+    fun hideBottomSheet() {
+        bottomSheetBehavior?.state = STATE_HIDDEN
+    }
+
+    fun showBottomSheet() {
+        if (bottomSheetBehavior?.state == STATE_HIDDEN) {
+            bottomSheetBehavior?.state = STATE_COLLAPSED
+        }
+    }
+
+    override fun onBackPressed() {
+        bottomSheetBehavior?.let {
+            if (it.state == STATE_EXPANDED) {
+                collapseBottomSheet()
+            } else {
+                super.onBackPressed()
+            }
+        }
+    }
+
+    private inner class BottomSheetCallback: BottomSheetBehavior.BottomSheetCallback() {
+
+        override fun onSlide(bottomSheet: View, slideOffset: Float) {
+            if (slideOffset > 0) {
+                dimOverlay.alpha = slideOffset
+            } else if (slideOffset == 0f) {
+                dimOverlay.visibility = View.GONE
+            }
+            bottomSheetListener?.onSlide(bottomSheet, slideOffset)
+        }
+
+        override fun onStateChanged(bottomSheet: View, newState: Int) {
+            if (newState == STATE_DRAGGING || newState == STATE_EXPANDED ) {
+                dimOverlay.visibility = View.VISIBLE
+            } else if (newState == STATE_COLLAPSED) {
+                dimOverlay.visibility = View.GONE
+            }
+            bottomSheetListener?.onStateChanged(bottomSheet, newState)
+        }
+
+    }
 }

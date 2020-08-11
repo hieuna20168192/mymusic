@@ -24,4 +24,6 @@
     <dimen name="bottom_controls_height">65dp</dimen>
     <dimen name="song_grid_spacing_large">34dp</dimen>
     <dimen name="song_grid_spacing_small">32dp</dimen>
+
+    <dimen name="icon_notification_dimen">32dp</dimen>
 </resources>
