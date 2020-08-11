@@ -1,6 +1,7 @@
 package com.example.mymusic.repository
 
 import android.content.ContentResolver
+import android.content.Context
 import android.provider.MediaStore
 import android.util.Log
 import com.example.mymusic.models.MediaID
@@ -8,15 +9,16 @@ import com.example.mymusic.models.Song
 import java.lang.IllegalStateException
 
 interface SongRepository {
-    var songList: List<Song>
     fun loadSongs(caller: String?): List<Song>
+    fun getSongForId(id: Long): Song
+    fun getSongsForIds(idList: LongArray): List<Song>
 }
 
 class SongReposImpl(
-    private val contentResolver: ContentResolver
+    private val context: Context
 ) : SongRepository {
 
-    override var songList: List<Song> = listOf()
+    private val contentResolver = context.contentResolver
 
     override fun loadSongs(caller: String?): List<Song> {
         MediaID.currentCaller = caller
@@ -24,12 +26,33 @@ class SongReposImpl(
 
     }
 
+    override fun getSongForId(id: Long): Song {
+        val songs = makeSongCursor("_id = $id", null)
+        Log.d("songs[0] is ", "${songs[0]}")
+        return songs[0]
+    }
+
+    override fun getSongsForIds(idList: LongArray): List<Song> {
+        var selection = "_id IN ("
+        for (id in idList) {
+            selection += "$id,"
+        }
+        if (idList.isNotEmpty()) {
+            selection = selection.substring(0, selection.length - 1)
+        }
+        selection += ")"
+
+        return makeSongCursor(selection, null)
+    }
+
     @Suppress("Recycle")
-    private fun makeSongCursor(selection: String?, paramArrayOfString: Array<String>?): List<Song> {
-//        val selectionStatement = StringBuilder("is_music=1 AND title != ''")
-//        if (!selection.isNullOrEmpty()) {
-//            selectionStatement.append(" AND $selection")
-//        }
+    private fun makeSongCursor(selectionPar: String?, paramArrayOfString: Array<String>?): List<Song> {
+        val selection = StringBuilder("is_music=1 AND title != ''")
+        if (!selectionPar.isNullOrEmpty()) {
+            selection.append(" AND $selectionPar")
+        }
+
+        Log.d("Selection is ", "$selection")
 
 //        val projection = arrayOf("_id", "title", "artist", "album", "duration", "track", "artist_id", "album_id")
 
@@ -47,10 +70,13 @@ class SongReposImpl(
         val query = contentResolver.query(
             MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
             projection,
-            null,
+            selection.toString(),
             null,
             null
-        ) ?: throw IllegalStateException("Unable to query ${MediaStore.Audio.Media.EXTERNAL_CONTENT_URI}, system returned null.")
+        )
+            ?: throw IllegalStateException("Unable to query ${MediaStore.Audio.Media.EXTERNAL_CONTENT_URI}, system returned null.")
+
+        var songList: List<Song> = listOf()
 
         query?.use { cursor ->
             // Cache column indices.
@@ -94,9 +120,23 @@ class SongReposImpl(
                 // that represents the media file.
                 songList += Song(id, albumID, artistID, title, artist, album, duration, track)
             }
-            Log.d("songList.size() = ", songList.size.toString())
+
             cursor?.close()
             return songList
+        }
+    }
+
+    companion object {
+        // For Singleton instantiation.
+        @Volatile
+        private var instance: SongRepository? = null
+
+        fun getInstance(context: Context) : SongRepository{
+            instance ?: synchronized(this) {
+                instance ?: SongReposImpl(context)
+                    .also { instance = it }
+            }
+            return instance!!
         }
     }
 }

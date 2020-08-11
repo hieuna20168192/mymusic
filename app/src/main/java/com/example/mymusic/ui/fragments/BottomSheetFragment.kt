@@ -1,25 +1,31 @@
 package com.example.mymusic.ui.fragments
 
-import android.content.ComponentName
 import android.os.Bundle
+import android.renderscript.ScriptGroup
+import android.support.v4.media.MediaBrowserCompat
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
+import android.widget.Toast
 import com.example.mymusic.R
+import com.example.mymusic.models.MediaData
+import com.example.mymusic.models.Song
 import com.example.mymusic.playback.server.MediaSessionConnection
 import com.example.mymusic.playback.server.MediaSessionConnectionImpl
-import com.example.mymusic.playback.server.MusicService
 import com.example.mymusic.presenter.MainContract
-import com.example.mymusic.presenter.PlayerPresenter
-import com.example.mymusic.repository.SongReposImpl
 import com.example.mymusic.ui.activities.MainActivity
+import com.example.mymusic.util.Binding
+import com.example.mymusic.util.InjectorUtils
+import com.example.mymusic.util.Utils
 import com.example.mymusic.widgets.BottomSheetListener
 import com.google.android.material.bottomsheet.BottomSheetBehavior.*
 import kotlinx.android.synthetic.main.fragment_bottom_sheet.*
+import kotlinx.android.synthetic.main.item_song.*
 
-class BottomSheetFragment : Fragment(), BottomSheetListener, MainContract.Player {
+class BottomSheetFragment : Fragment(), BottomSheetListener, MainContract.BottomSheetView {
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -29,22 +35,13 @@ class BottomSheetFragment : Fragment(), BottomSheetListener, MainContract.Player
         return inflater.inflate(R.layout.fragment_bottom_sheet, container, false)
     }
 
-    private lateinit var playerPresenter: PlayerPresenter
+    lateinit var playerPresenter: MainContract.PlayerPresenter
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
         // Set up Presenter
-        setPresenter(
-            PlayerPresenter(
-                this, SongReposImpl(activity!!.contentResolver),
-                MediaSessionConnectionImpl.getInstance(
-                    activity!!,
-                    ComponentName(activity!!, MusicService::class.java)
-                )
-            )
-        )
-
+        playerPresenter = InjectorUtils.providePlayerPresenter(this)
 
         // Set up UI
         val layoutParams = progressBar.layoutParams as LinearLayout.LayoutParams
@@ -55,10 +52,12 @@ class BottomSheetFragment : Fragment(), BottomSheetListener, MainContract.Player
 
         btnTogglePlayPause.setOnClickListener {
             // Handle event play/pause
+            playerPresenter.playCurrent(null)
         }
 
         btnPlayPause.setOnClickListener {
             // Handle event quick play/pause
+            playerPresenter.playCurrent(null)
         }
 
         btnNext.setOnClickListener {
@@ -110,11 +109,38 @@ class BottomSheetFragment : Fragment(), BottomSheetListener, MainContract.Player
         }
     }
 
-    override fun updateIcon() {
+    override fun bindView(currentData: MediaData) {
+        /**
+         *  var mediaId: String? = "",
+        var title: String? = "",
+        var artist: String? = "",
+        var album: String ? = "",
+        var artwork: Bitmap? = null,
+        var artworkId: Long? = 0,
+        var position: Int? = 0,
+        var duration: Int? = 0,
+        var shuffleMode: Int? = 0,
+        var repeatMode: Int? = 0,
+        var state: Int? = 0
+         */
+
+        Log.d("currentData is ", "${currentData.toString()}")
+        // Bind View
+        songTitle.text = currentData.title
+        songArtist.text = currentData.artist
+        bottomContolsAlbumart.setImageBitmap(currentData.artwork)
+        Binding.setDuration(progressText, currentData.position!!)
+        Binding.setDuration(durationText, currentData.duration!!)
 
     }
 
-    override fun setPresenter(presenter: MainContract.Presenter) {
-
+    override fun bindViewByState(currentData: MediaData) {
+        Binding.setPlayState(btnTogglePlayPause, currentData.state!!)
+        Binding.setPlayState(btnPlayPause, currentData.state!!)
     }
+
+    override fun setPresenter(presenter: MainContract.PlayerPresenter) {
+        this.playerPresenter = presenter
+    }
+
 }

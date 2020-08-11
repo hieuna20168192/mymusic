@@ -5,19 +5,31 @@ import android.content.Context
 import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaControllerCompat
+import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
+import com.example.mymusic.models.QueueData
+
 
 interface MediaSessionConnection {
-    var isConnected: Boolean
-    val rootMediaId: String?
+
+    val rootMediaId: String
     val transportControls: MediaControllerCompat.TransportControls
-    var playbackState: PlaybackStateCompat
     var mediaController: MediaControllerCompat
+
+    fun connected(connected: OnConnected)
+
+    fun postPlaybackState(playbackState: UpdatePlaybackState)
+
+    fun postNowPlayingData(playingData: UpdateNowPlayingData)
+
+    fun postQueueData(queueData: UpdateQueueData)
 
     fun subscribe(parentId: String, callback: MediaBrowserCompat.SubscriptionCallback)
 
     fun unsubscribe(parentId: String, callback: MediaBrowserCompat.SubscriptionCallback)
+
+//    fun invokeMediaControllerCallback()
 }
 
 class MediaSessionConnectionImpl(
@@ -25,9 +37,14 @@ class MediaSessionConnectionImpl(
     serviceComponent: ComponentName
 ) : MediaSessionConnection {
 
-    override var isConnected: Boolean = false
 
-    override var playbackState: PlaybackStateCompat = EMPTY_PLAYBACK_STATE
+    private var isConnectedCallback : OnConnected = {}
+    private var updatePlaybackState : UpdatePlaybackState = {}
+    private var updateNowPlayingData : UpdateNowPlayingData = {}
+    private var updateQueueData : UpdateQueueData = {}
+
+    override val rootMediaId: String
+        get() = mediaBrowser.root
 
     private val mediaBrowserConnectionCallback = MediaBrowserConnectionCallback(context)
 
@@ -38,9 +55,27 @@ class MediaSessionConnectionImpl(
         mediaBrowserConnectionCallback, null
     ).apply { connect() }
 
-    override var rootMediaId: String? = null
-
     override lateinit var mediaController: MediaControllerCompat
+
+    override fun connected(connected: OnConnected) {
+        this.isConnectedCallback = connected
+    }
+
+    override fun postPlaybackState(playbackState: UpdatePlaybackState) {
+        Log.d("Order", "MediaSessionConnection playbackState")
+        this.updatePlaybackState = playbackState
+    }
+
+    override fun postNowPlayingData(playingData: UpdateNowPlayingData) {
+        Log.d("Order", "MediaSessionConnection postNowPlayingData")
+        this.updateNowPlayingData = playingData
+    }
+
+    override fun postQueueData(queueData: UpdateQueueData) {
+        Log.d("Order", "MediaSessionConnection postQueueData")
+        this.updateQueueData = queueData
+    }
+
     override fun subscribe(parentId: String, callback: MediaBrowserCompat.SubscriptionCallback) {
         mediaBrowser.subscribe(parentId, callback)
     }
@@ -52,39 +87,42 @@ class MediaSessionConnectionImpl(
     override val transportControls: MediaControllerCompat.TransportControls
         get() = mediaController.transportControls
 
-    private val subscriptionCallback = object : MediaBrowserCompat.SubscriptionCallback() {
-        override fun onChildrenLoaded(
-            parentId: String,
-            children: MutableList<MediaBrowserCompat.MediaItem>
-        ) {
-            Log.d("parentId ", parentId)
 
-        }
-    }
+    private val mediaControllerCallback: MediaControllerCallback = MediaControllerCallback()
 
     private inner class MediaBrowserConnectionCallback(private val context: Context) :
         MediaBrowserCompat.ConnectionCallback() {
         override fun onConnected() {
             mediaController = MediaControllerCompat(context, mediaBrowser.sessionToken).apply {
-                registerCallback(MediaControllerCallback())
+                registerCallback(mediaControllerCallback)
             }
-            isConnected = true
-            rootMediaId = mediaBrowser.root
-            subscribe(rootMediaId.toString(), subscriptionCallback)
+            isConnectedCallback(this@MediaSessionConnectionImpl, true)
         }
 
         override fun onConnectionSuspended() {
-            isConnected = false
+            isConnectedCallback(this@MediaSessionConnectionImpl, false)
         }
 
         override fun onConnectionFailed() {
-            isConnected = false
+            isConnectedCallback(this@MediaSessionConnectionImpl, false)
         }
+
     }
 
     private inner class MediaControllerCallback : MediaControllerCompat.Callback() {
         override fun onPlaybackStateChanged(state: PlaybackStateCompat?) {
-            playbackState = state ?: EMPTY_PLAYBACK_STATE
+            updatePlaybackState.invoke(this@MediaSessionConnectionImpl, state ?: EMPTY_PLAYBACK_STATE)
+            Log.d("Playbackstate is ", state.toString())
+        }
+
+        override fun onMetadataChanged(metadata: MediaMetadataCompat?) {
+            Log.d("Hello ", "World")
+            super.onMetadataChanged(metadata)
+            updateNowPlayingData.invoke(this@MediaSessionConnectionImpl, metadata ?: NOTHING_PLAYING)
+        }
+
+        override fun onQueueChanged(queue: MutableList<MediaSessionCompat.QueueItem>?) {
+            updateQueueData.invoke(this@MediaSessionConnectionImpl, QueueData().fromMediaController(mediaController))
         }
 
         override fun onSessionDestroyed() {
@@ -95,12 +133,13 @@ class MediaSessionConnectionImpl(
     companion object {
         // For Singleton instantiation.
         @Volatile
-        private var instance: MediaSessionConnection? = null
+        public var instance: MediaSessionConnection? = null
 
-        fun getInstance(context: Context, serviceComponent: ComponentName) =
+        fun getInstance(context: Context, serviceComponent: ComponentName) : MediaSessionConnection =
             instance ?: synchronized(this) {
                 instance ?: MediaSessionConnectionImpl(context, serviceComponent)
                     .also { instance = it }
+                return instance!!
             }
     }
 }

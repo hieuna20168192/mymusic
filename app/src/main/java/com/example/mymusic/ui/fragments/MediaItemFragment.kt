@@ -38,6 +38,7 @@ open class MediaItemFragment : Fragment() {
 
         return MediaID(mediaType, mediaId, caller)
     }
+
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 

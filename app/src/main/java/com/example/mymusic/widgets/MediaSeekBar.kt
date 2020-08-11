@@ -2,6 +2,7 @@ package com.example.mymusic.widgets
 
 import android.animation.ValueAnimator
 import android.content.Context
+import android.os.Build
 import android.provider.Settings
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaControllerCompat
@@ -10,6 +11,7 @@ import android.support.v4.media.session.PlaybackStateCompat
 import android.util.AttributeSet
 import android.view.animation.LinearInterpolator
 import android.widget.SeekBar
+import androidx.annotation.RequiresApi
 
 import androidx.appcompat.widget.AppCompatSeekBar
 
@@ -27,6 +29,7 @@ class MediaSeekBar : AppCompatSeekBar {
 
     //get the global duration scale for animators, user may chane the duration scale from developer options
     //need to make sure our value animator doesn't change the duration scale
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
     private val mDurationScale = Settings.Global.getFloat(context.contentResolver,
             Settings.Global.ANIMATOR_DURATION_SCALE, 1f)
 

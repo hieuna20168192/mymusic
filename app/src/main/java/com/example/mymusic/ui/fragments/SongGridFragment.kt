@@ -1,42 +1,44 @@
 package com.example.mymusic.ui.fragments
 
-import android.content.ComponentName
+import android.content.Context
 import android.os.Build
 import android.os.Bundle
 import android.support.v4.media.MediaBrowserCompat
 import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.view.KeyEventDispatcher
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.mymusic.R
-import com.example.mymusic.models.MediaID
+import com.example.mymusic.extensions.addOnItemClick
+import com.example.mymusic.extensions.getExtraBundle
+import com.example.mymusic.extensions.toSongIds
 import com.example.mymusic.models.Song
-import com.example.mymusic.playback.server.MediaSessionConnection
-import com.example.mymusic.playback.server.MediaSessionConnectionImpl
-import com.example.mymusic.playback.server.MusicService
 import com.example.mymusic.presenter.MainContract
-import com.example.mymusic.presenter.MainPresenter
-import com.example.mymusic.repository.SongReposImpl
-import com.example.mymusic.repository.SongRepository
 import com.example.mymusic.ui.adapter.SongAdapter
+import com.example.mymusic.util.InjectorUtils
 import com.example.mymusic.util.SongGridItemDecoration
 import kotlinx.android.synthetic.main.song_grid_fragment.view.recycler_view
 import kotlinx.android.synthetic.main.song_grid_fragment.view.song_grid
 
 class SongGridFragment : MediaItemFragment(), MainContract.View {
 
-    private lateinit var presenter: MainContract.Presenter
+    private lateinit var reposPresenter: MainContract.ReposPresenter
+
+    private lateinit var itemClickCallback: MediaItemSelected
+
+
+    interface MediaItemSelected {
+        fun mediaItemClick(mediaItem: MediaBrowserCompat.MediaItem, extras: Bundle?)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setHasOptionsMenu(true)
     }
 
-    val adapter = SongAdapter(listOf())
+    private val songAdapter = SongAdapter(listOf())
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -44,12 +46,10 @@ class SongGridFragment : MediaItemFragment(), MainContract.View {
     ): View? {
         val view = inflater.inflate(R.layout.song_grid_fragment, container, false)
 
-        // Set up Presenter
-        setPresenter(MainPresenter(this, SongReposImpl(context!!.contentResolver),
-            MediaSessionConnectionImpl.getInstance(activity!!, ComponentName(activity!!,
-                MusicService::class.java))))
+        // Inject Presenter
+        reposPresenter = InjectorUtils.provideReposPresenter(this)
 
-        presenter.onViewCreated()
+        reposPresenter.onViewCreated()
 
         // Set up the RecyclerView
         view.recycler_view.setHasFixedSize(true)
@@ -59,7 +59,22 @@ class SongGridFragment : MediaItemFragment(), MainContract.View {
         val largePadding = resources.getDimensionPixelSize(R.dimen.song_grid_spacing_large)
         val smallPadding = resources.getDimensionPixelSize(R.dimen.song_grid_spacing_small)
         view.recycler_view.addItemDecoration(SongGridItemDecoration(largePadding, smallPadding))
-        view.recycler_view.adapter = adapter
+
+        // Set SongList click event
+        view.recycler_view.apply {
+            view.recycler_view.adapter = songAdapter
+            addOnItemClick { position: Int, _: View ->
+                songAdapter.getSongForPosition(position)?.let {
+                    val extras = getExtraBundle(
+                        songAdapter.songList.toSongIds(),
+                        getString(R.string.all_songs)
+                    )
+                    // Handle mediaItemClick with song, extras
+                    Log.d("HandEvent click ", "pos = $position and id = ${it.id}")
+                    itemClickCallback.mediaItemClick(it, extras)
+                }
+            }
+        }
 
         // Set cut corner background for API 23+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -70,15 +85,16 @@ class SongGridFragment : MediaItemFragment(), MainContract.View {
     }
 
     override fun displaySong(list: List<Song>) {
-        adapter.updateDate(list)
+        songAdapter.updateDate(list)
     }
 
-    override fun setPresenter(presenter: MainContract.Presenter) {
-        this.presenter = presenter
+    override fun setPresenter(presenter: MainContract.ReposPresenter) {
+        this.reposPresenter = presenter
     }
 
-    override fun onDestroy() {
-        presenter.onDestroy()
-        super.onDestroy()
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        itemClickCallback = context as MediaItemSelected
     }
+
 }

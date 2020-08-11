@@ -1,12 +1,9 @@
 package com.example.mymusic.playback.server
 
-import android.app.PendingIntent
 import android.net.Uri
 import android.os.Bundle
 import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaDescriptionCompat
-import android.support.v4.media.session.MediaSessionCompat
-import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
@@ -18,8 +15,8 @@ import com.example.mymusic.extensions.toRawMediaItems
 import com.example.mymusic.models.MediaID
 import com.example.mymusic.models.MediaID.Companion.CALLER_OTHER
 import com.example.mymusic.models.MediaID.Companion.CALLER_SELF
-import com.example.mymusic.repository.SongReposImpl
 import com.example.mymusic.repository.SongRepository
+import com.example.mymusic.util.InjectorUtils
 import com.example.mymusic.util.Utils.EMPTY_ALBUM_ART_URI
 
 class MusicService :
@@ -41,52 +38,39 @@ class MusicService :
         const val TYPE_ALL_FOLDERS = 13
         const val TYPE_ALL_GENRES = 14
         const val TYPE_GENRE = 15
+        const val MEDIA_ID_NAV_SONG = 16
 
         const val NOTIFICATION_ID = 888
     }
 
-    private var mediaSession: MediaSessionCompat? = null
-    private lateinit var stateBuilder: PlaybackStateCompat.Builder
-
+    private lateinit var player: SongPlayer
+    private lateinit var connection: MediaSessionConnection
     private val lifecycle = LifecycleRegistry(this)
     private lateinit var repository: SongRepository
 
     override fun onCreate() {
         super.onCreate()
+
+        // Inject player
+        player = InjectorUtils.provideSongPlayer(applicationContext)
+
+
+        // Inject Repos
+        repository = InjectorUtils.provideSongRepository(applicationContext)
+
         lifecycle.currentState = Lifecycle.State.RESUMED
-        Log.d("onCreate MusicService", "RESUME")
+        Log.d("onCreateMusicService", "RESUME")
 
-        repository = SongReposImpl(baseContext.contentResolver)
-        // Create a MediaSessionCompat
-        mediaSession = MediaSessionCompat(baseContext, APP_PACKAGE_NAME).apply {
-
-            // Enable callbacks from MediaButtons and TransportControls
-            setFlags(
-                MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS
-                        or MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS
-            )
-
-            // Set an initial PlaybackState with ACTION_PLAY, so media buttons can start the player
-            stateBuilder = PlaybackStateCompat.Builder()
-                .setActions(
-                    PlaybackStateCompat.ACTION_PLAY
-                            or PlaybackStateCompat.ACTION_PLAY_PAUSE
-                )
-            setPlaybackState(stateBuilder.build())
-
-            // My SessionCallback() has methods that handle callbacks from a media controller
-            setCallback(MediaSessionCallback())
-
-            // Set the session's token so that client activities can communicate with it.
-            setSessionToken(sessionToken)
-            Log.d("setSessionToken ", "is call")
-            val sessionIntent =
-                baseContext.packageManager.getLaunchIntentForPackage(baseContext.packageName)
-            val sessionActivityPendingIntent =
-                PendingIntent.getActivity(baseContext, 0, sessionIntent, 0)
-            setSessionActivity(sessionActivityPendingIntent)
+        sessionToken = player.getSession().sessionToken
+        player.onPlayingState { isPlaying ->
+            Log.d("Order", "onCreateMusicService TimberMusicService isPlaying is $isPlaying")
+            if (isPlaying) {
+                // Register becoming Noisy Receiver
+            } else {
+                // Unregister Noisy Receiver
+            }
+            // Update Notification
         }
-
     }
 
     override fun onLoadChildren(
@@ -123,7 +107,6 @@ class MusicService :
         }
     }
 
-
     private fun addMediaRoots(
         mMediaRoot: MutableList<MediaBrowserCompat.MediaItem>,
         caller: String
@@ -140,6 +123,34 @@ class MusicService :
         )
     }
 
+//    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+//
+//        if (intent == null) {
+//            return START_STICKY
+//        }
+//
+//        val mediaSession = mediaSession
+//        val controller = mediaSession!!.controller
+//
+//        when (intent.action) {
+//            ACTION_PLAY_PAUSE -> {
+//                controller.playbackState?.let { playbackState ->
+//                    when {
+//                        playbackState.isPlaying -> controller.transportControls.pause()
+//                        playbackState.isPlaying -> controller.transportControls.play()
+//                    }
+//                }
+//            }
+//            ACTION_NEXT -> {
+//                controller.transportControls.skipToNext()
+//            }
+//            ACTION_PREVIOUS -> {
+//                controller.transportControls.skipToPrevious()
+//            }
+//        }
+//        MediaButtonReceiver.handleIntent(mediaSession, intent)
+//        return START_STICKY
+//    }
 
     override fun onGetRoot(
         clientPackageName: String,
@@ -164,5 +175,12 @@ class MusicService :
     }
 
     override fun getLifecycle() = lifecycle
+
+    override fun onDestroy() {
+        lifecycle.currentState = Lifecycle.State.DESTROYED
+        player.release()
+        super.onDestroy()
+    }
+
 }
 

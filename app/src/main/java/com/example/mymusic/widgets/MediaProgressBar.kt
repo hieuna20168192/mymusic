@@ -2,6 +2,7 @@ package com.example.mymusic.widgets
 
 import android.animation.ValueAnimator
 import android.content.Context
+import android.os.Build
 import android.provider.Settings
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaControllerCompat
@@ -10,6 +11,7 @@ import android.support.v4.media.session.PlaybackStateCompat
 import android.util.AttributeSet
 import android.view.animation.LinearInterpolator
 import android.widget.ProgressBar
+import androidx.annotation.RequiresApi
 
 /**
  * SeekBar that can be used with a [MediaSessionCompat] to track and seek in playing
@@ -25,6 +27,7 @@ class MediaProgressBar : ProgressBar {
 
     //get the global duration scale for animators, user may chane the duration scale from developer options
     //need to make sure our value animator doesn't change the duration scale
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
     private val mDurationScale = Settings.Global.getFloat(context.contentResolver,
             Settings.Global.ANIMATOR_DURATION_SCALE, 1f)
 
@@ -34,6 +37,7 @@ class MediaProgressBar : ProgressBar {
 
     constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
 
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
     fun setMediaController(mediaController: MediaControllerCompat?) {
         if (mediaController != null) {
             mControllerCallback = ControllerCallback()
@@ -57,6 +61,7 @@ class MediaProgressBar : ProgressBar {
 
     private inner class ControllerCallback : MediaControllerCompat.Callback(), ValueAnimator.AnimatorUpdateListener {
 
+        @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
         override fun onPlaybackStateChanged(state: PlaybackStateCompat?) {
             super.onPlaybackStateChanged(state)
             state ?: return
@@ -90,6 +95,7 @@ class MediaProgressBar : ProgressBar {
             }
         }
 
+        @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
         override fun onMetadataChanged(metadata: MediaMetadataCompat?) {
             super.onMetadataChanged(metadata)
 

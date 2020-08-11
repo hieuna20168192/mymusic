@@ -33,8 +33,13 @@ class SongAdapter internal constructor(var songList: List<Song>) : RecyclerView.
         var songArtist: TextView = itemView.findViewById(R.id.song_artist)
     }
 
+    fun getSongForPosition(position: Int) : Song? {
+        return if (position >= 0) songList[position] else null
+    }
+
     fun updateDate(songs: List<Song>) {
         this.songList = songs
         notifyDataSetChanged()
     }
+
 }
