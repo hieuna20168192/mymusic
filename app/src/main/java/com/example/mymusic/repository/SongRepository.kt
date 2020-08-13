@@ -16,7 +16,11 @@ class SongReposImpl(
     private val contentResolver: ContentResolver
 ) : SongRepository {
 
+<<<<<<< HEAD
     override var songList: List<Song> = listOf()
+=======
+    override var songList: List<Song> = mutableListOf()
+>>>>>>> 8209e57... setup client-server connect
 
     override fun loadSongs(caller: String?): List<Song> {
         MediaID.currentCaller = caller
@@ -71,7 +75,11 @@ class SongReposImpl(
                 cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID)
 
             while (cursor.moveToNext()) {
+<<<<<<< HEAD
                 // Get values of columns for a given audio.
+=======
+                // Get values of columns for a given video.
+>>>>>>> 8209e57... setup client-server connect
                 val id = cursor.getLong(idColumn)
                 val title = cursor.getString(titleColumn)
                 val artist = cursor.getString(artistColumn)
@@ -81,6 +89,7 @@ class SongReposImpl(
                 val artistID = cursor.getLong(artistIDColumn)
                 val albumID = cursor.getLong(albumIDColumn)
 
+<<<<<<< HEAD
 //                var id: Long = 0,
 //                var albumId: Long = 0,
 //                var artistId: Long = 0,
@@ -93,6 +102,11 @@ class SongReposImpl(
                 // Stores column values and the contentUri in a local object
                 // that represents the media file.
                 songList += Song(id, albumID, artistID, title, artist, album, duration, track)
+=======
+                // Stores column values and the contentUri in a local object
+                // that represents the media file.
+                songList += (Song(id, albumID, artistID, title, artist, album, duration, track))
+>>>>>>> 8209e57... setup client-server connect
             }
             Log.d("songList.size() = ", songList.size.toString())
             cursor?.close()

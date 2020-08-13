@@ -2,7 +2,10 @@ package com.example.mymusic.ui.activities
 
 import Permission.Companion.REQUEST_CODE_PERMISSION
 import android.content.ComponentName
+<<<<<<< HEAD
 import android.media.AudioManager
+=======
+>>>>>>> 8209e57... setup client-server connect
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
@@ -11,6 +14,7 @@ import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.FrameLayout
 import androidx.core.content.ContextCompat
 import com.example.mymusic.R
+<<<<<<< HEAD
 import com.example.mymusic.extensions.addFragment
 import com.example.mymusic.models.MediaID
 import com.example.mymusic.playback.server.MediaSessionConnection
@@ -21,6 +25,13 @@ import com.example.mymusic.repository.SongReposImpl
 import com.example.mymusic.repository.SongRepository
 import com.example.mymusic.ui.fragments.BottomSheetFragment
 import com.example.mymusic.ui.fragments.MediaItemFragment
+=======
+import com.example.mymusic.playback.server.MediaSessionConnection
+import com.example.mymusic.playback.server.MediaSessionConnectionImpl
+import com.example.mymusic.playback.server.MusicService
+import com.example.mymusic.repository.SongReposImpl
+import com.example.mymusic.repository.SongRepository
+>>>>>>> 8209e57... setup client-server connect
 import com.example.mymusic.util.NavigationIconClickListener
 import com.example.mymusic.ui.fragments.SongGridFragment
 import com.example.mymusic.widgets.BottomSheetListener
@@ -31,21 +42,31 @@ import kotlinx.android.synthetic.main.music_backdrop.*
 
 class MainActivity : AppCompatActivity() {
 
+<<<<<<< HEAD
     private lateinit var mediaSessionConnection: MediaSessionConnection
     private lateinit var songRepository: SongRepository
 
     private var bottomSheetListener: BottomSheetListener? = null
     private var bottomSheetBehavior: BottomSheetBehavior<View>? = null
 
+=======
+    private lateinit var mediaSessionConnection : MediaSessionConnection
+    private lateinit var songRepository: SongRepository
+
+>>>>>>> 8209e57... setup client-server connect
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
         songRepository = SongReposImpl(contentResolver)
+<<<<<<< HEAD
         mediaSessionConnection = MediaSessionConnectionImpl.getInstance(
             application,
             ComponentName(application, MusicService::class.java)
         )
+=======
+        mediaSessionConnection = MediaSessionConnectionImpl.getInstance(application, ComponentName(application, MusicService::class.java))
+>>>>>>> 8209e57... setup client-server connect
         Permission.checkPermission(this, REQUEST_CODE_PERMISSION)
         if (savedInstanceState == null) {
             supportFragmentManager

@@ -10,8 +10,11 @@ interface MainContract {
     interface View : BaseView<Presenter> {
         fun displaySong(list: List<Song>)
     }
+<<<<<<< HEAD
 
     interface Player: BaseView<Presenter> {
         fun updateIcon()
     }
+=======
+>>>>>>> 8209e57... setup client-server connect
 }

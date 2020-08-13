@@ -2,6 +2,7 @@ package com.example.mymusic.presenter
 
 import android.support.v4.media.MediaBrowserCompat
 import android.util.Log
+<<<<<<< HEAD
 import com.example.mymusic.extensions.getCurrentMediaID
 import com.example.mymusic.playback.server.MediaSessionConnection
 import com.example.mymusic.playback.server.MediaSessionConnectionImpl
@@ -30,6 +31,18 @@ class MainPresenter(
 
     private fun subscribe() {
         mediaSessionConnection.subscribe((view as MediaItemFragment).getCurrentMediaId().asString(), subscriptionCallback)
+=======
+import com.example.mymusic.playback.server.MediaSessionConnection
+import com.example.mymusic.repository.SongRepository
+
+class MainPresenter(
+    private var view: MainContract.View?,
+    private val songRepository: SongRepository
+) : MainContract.Presenter{
+
+    override fun onViewCreated() {
+        loadSong()
+>>>>>>> 8209e57... setup client-server connect
     }
 
     private fun loadSong() {

@@ -16,8 +16,11 @@ import com.example.mymusic.R
 import com.example.mymusic.models.MediaID
 import com.example.mymusic.models.Song
 import com.example.mymusic.playback.server.MediaSessionConnection
+<<<<<<< HEAD
 import com.example.mymusic.playback.server.MediaSessionConnectionImpl
 import com.example.mymusic.playback.server.MusicService
+=======
+>>>>>>> 8209e57... setup client-server connect
 import com.example.mymusic.presenter.MainContract
 import com.example.mymusic.presenter.MainPresenter
 import com.example.mymusic.repository.SongReposImpl
@@ -27,9 +30,15 @@ import com.example.mymusic.util.SongGridItemDecoration
 import kotlinx.android.synthetic.main.song_grid_fragment.view.recycler_view
 import kotlinx.android.synthetic.main.song_grid_fragment.view.song_grid
 
+<<<<<<< HEAD
 class SongGridFragment : MediaItemFragment(), MainContract.View {
 
     private lateinit var presenter: MainContract.Presenter
+=======
+class SongGridFragment : Fragment(), MainContract.View {
+
+    internal lateinit var presenter: MainContract.Presenter
+>>>>>>> 8209e57... setup client-server connect
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,10 +54,14 @@ class SongGridFragment : MediaItemFragment(), MainContract.View {
         val view = inflater.inflate(R.layout.song_grid_fragment, container, false)
 
         // Set up Presenter
+<<<<<<< HEAD
         setPresenter(MainPresenter(this, SongReposImpl(context!!.contentResolver),
             MediaSessionConnectionImpl.getInstance(activity!!, ComponentName(activity!!,
                 MusicService::class.java))))
 
+=======
+        setPresenter(MainPresenter(this, SongReposImpl(context!!.contentResolver)))
+>>>>>>> 8209e57... setup client-server connect
         presenter.onViewCreated()
 
         // Set up the RecyclerView

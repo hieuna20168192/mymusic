@@ -20,3 +20,4 @@ enum class SongSortOrder(val rawValue: String) {
         fun toString(value: SongSortOrder): String = value.rawValue
     }
 }
+

@@ -17,3 +17,4 @@ fun <T> Fragment.argumentOr(name: String, default: T): T {
 fun Fragment.argumentOrEmpty(name: String): String {
     return arguments?.get(name) as? String ?: ""
 }
+

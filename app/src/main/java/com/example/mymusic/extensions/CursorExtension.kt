@@ -62,3 +62,4 @@ inline fun <reified T> Cursor.valueOrDefault(name: String, defaultValue: T): T {
 }
 
 fun Cursor.valueOrEmpty(name: String): String = valueOrDefault(name, "")
+

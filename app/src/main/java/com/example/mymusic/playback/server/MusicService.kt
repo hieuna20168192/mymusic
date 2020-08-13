@@ -1,6 +1,12 @@
 package com.example.mymusic.playback.server
 
+<<<<<<< HEAD
 import android.app.PendingIntent
+=======
+import android.annotation.SuppressLint
+import android.app.PendingIntent
+import android.media.browse.MediaBrowser.MediaItem.FLAG_BROWSABLE
+>>>>>>> 8209e57... setup client-server connect
 import android.net.Uri
 import android.os.Bundle
 import android.support.v4.media.MediaBrowserCompat
@@ -116,7 +122,10 @@ class MusicService :
         }
 
         if (caller == CALLER_SELF) {
+<<<<<<< HEAD
             Log.d("mediaItems.size() = ", mediaItems.size.toString())
+=======
+>>>>>>> 8209e57... setup client-server connect
             result.sendResult(mediaItems)
         } else {
             result.sendResult(mediaItems.toRawMediaItems())
@@ -153,6 +162,10 @@ class MusicService :
             CALLER_OTHER
         }
 
+<<<<<<< HEAD
+=======
+        repository.loadSongs(caller)
+>>>>>>> 8209e57... setup client-server connect
         Log.d("Root folder: ", MediaID(MEDIA_ID_ROOT.toString(), null, caller).asString(), null)
         return BrowserRoot(
             MediaID(
