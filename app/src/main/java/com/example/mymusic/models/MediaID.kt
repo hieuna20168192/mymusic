@@ -2,7 +2,7 @@ package com.example.mymusic.models
 
 import android.support.v4.media.MediaBrowserCompat
 
-class MediaID (var type: String? = null, var mediaId: String? = "NA", var caller: String? = currentCaller) {
+class MediaID(var type: String? = null, var mediaId: String? = "NA", var caller: String? = currentCaller) {
     companion object {
         const val CALLER_SELF = "self"
         const val CALLER_OTHER = "other"
@@ -12,7 +12,7 @@ class MediaID (var type: String? = null, var mediaId: String? = "NA", var caller
         private const val CALLER = "caller: "
         private const val SEPARATOR = " | "
 
-        var currentCaller: String? = CALLER_SELF
+        var currentCaller: String? = MediaID.CALLER_SELF
     }
 
     var mediaItem: MediaBrowserCompat.MediaItem? = null
