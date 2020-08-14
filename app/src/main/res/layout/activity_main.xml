@@ -41,7 +41,7 @@
     <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_marginTop="56dp"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:id="@+id/sliding_layout">
         <FrameLayout
             android:id="@+id/container"
@@ -70,7 +70,8 @@
                 <FrameLayout
                     android:id="@+id/bottomControlsContainer"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"/>
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/rounded_corner"/>
             </androidx.cardview.widget.CardView>
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 </FrameLayout>
